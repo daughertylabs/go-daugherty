@@ -1,6 +1,6 @@
 go 1.19
 
 use (
-	./go-testing/fuzz
-	./go-testing/simple
+	./go-basics
+	./go-testing
 )
