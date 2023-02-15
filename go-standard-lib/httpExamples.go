@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -23,9 +24,43 @@ func HttpGetExample() {
 	fmt.Println(string(msg))
 }
 
+type User struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
+func HttpPostAnotherExample() {
+
+	r, m := io.Pipe()
+
+	go func() {
+		defer m.Close()
+		if err := json.NewEncoder(m).Encode(&User{
+			ID:   46,
+			Name: "Joe",
+			Age:  20,
+		}); err != nil {
+			log.Fatalf("Something went wrong on encoding the reader: %v", err)
+		}
+	}()
+
+	resp, err := http.Post("http://localhost:3000/users", "application/json", r)
+	if err != nil {
+		log.Panicf("http.Post failed with %s", err.Error())
+	}
+	defer resp.Body.Close()
+
+	msg, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Panicf("io.ReadAll failed with %s", err.Error())
+	}
+	fmt.Println("POST Status code: ", resp.Status, " | Message: ", string(msg))
+}
+
 func HttpPostExample() {
 	name := strings.NewReader("Gopher")
-	resp, err := http.Post("http://localhost:8081/thing", "text/plain", name)
+	resp, err := http.Post("http://localhost:8080/post-example", "text/plain", name)
 	if err != nil {
 		log.Panicf("http.Post failed with %s", err.Error())
 	}
@@ -53,10 +88,6 @@ func HttpServerExamples() {
 	if err != nil {
 		log.Fatalf("ListenAndServer error: %s", err.Error())
 	}
-}
-
-func s() string {
-	return "hi"
 }
 
 func fileHandler(w http.ResponseWriter, r *http.Request) {
