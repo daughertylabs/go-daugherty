@@ -6,5 +6,6 @@ use (
 	./go-error-handling
 	./go-standard-lib
 	./go-test-server
+	./go-concurrency
 	./go-lab
 )
